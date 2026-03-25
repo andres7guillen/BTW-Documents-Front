@@ -1,0 +1,124 @@
+<div class="container mt-4">
+    <h2>Documentos</h2>
+
+    <a routerLink="/documents/create" class="btn btn-primary">Crear</a>
+
+    <table class="table table-striped mt-3">
+        <thead class="thead-dark">
+            <tr>
+                <th>Número legal</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Emisor</th>
+                <th>Receptor</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr *ngFor="let doc of documents">
+                <td>{{ doc.legalNumber }}</td>
+                <td>{{ doc.type }}</td>
+                <td>{{ doc.status }}</td>
+                <td>{{ doc.emitterName }}</td>
+                <td>{{ doc.receiverName }}</td>
+
+                <td>
+                    <a [routerLink]="['/documents', doc.id]" class="btn btn-info btn-sm me-2">Detail</a>
+                    <a [routerLink]="['/documents', doc.id, 'edit']" class="btn btn-warning btn-sm me-2">Edit</a>
+                    <button class="btn btn-danger btn-sm me-2" (click)="delete(doc)">Delete</button>
+
+                    <button *ngIf="doc.status === 'Draft'" class="btn btn-success btn-sm me-2" (click)="issue(doc)">
+                        Issue
+                    </button>
+
+                    <button *ngIf="doc.status === 'Issued'" class="btn btn-danger btn-sm me-2" (click)="cancel(doc)">
+                        Cancel
+                    </button>
+
+                    <button class="btn btn-secondary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#historyModal"
+                        (click)="openHistory(doc.id)">
+                        History
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="row mt-3">
+    <form [formGroup]="filterForm" class="row mt-3">
+
+        <div class="col-md-3">
+            <select class="form-control" formControlName="status">
+                <option value="">Estado</option>
+                <option value="Draft">Draft</option>
+                <option value="Issued">Issued</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <select class="form-control" formControlName="type">
+                <option value="">Tipo</option>
+                <option value="Invoice">Invoice</option>
+                <option value="CreditNote">CreditNote</option>
+            </select>
+        </div>
+
+    </form>
+
+</div>
+
+<ul class="pagination mt-3">
+    <li class="page-item" [class.disabled]="page === 1">
+        <button class="page-link" (click)="changePage(page - 1)">Anterior</button>
+    </li>
+
+    <li class="page-item">
+        <span class="page-link">{{page}}</span>
+    </li>
+
+    <li class="page-item" [class.disabled]="page * pageSize >= total">
+        <button class="page-link" (click)="changePage(page + 1)">Siguiente</button>
+    </li>
+</ul>
+
+<div class="modal fade" id="historyModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5>Histórico de estados</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div *ngIf="loadingHistory">Cargando...</div>
+
+                <table class="table table-sm" *ngIf="!loadingHistory && history.length > 0">
+                    <thead>
+                        <tr>
+                            <th>Estado</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let h of history">
+                            <td>
+                                <span class="badge bg-primary">{{ h.status }}</span>
+                            </td>
+                            <td>{{ h.changedAt | date:'short' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div *ngIf="history.length === 0">
+                    No hay historial
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
